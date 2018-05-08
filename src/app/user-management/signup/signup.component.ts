@@ -40,11 +40,9 @@ export class SignupComponent implements OnInit {
         password : this.password,
         apikey : "NGI3ZWExMDY1OGQwNjU2NTNhYTEzNmY5ODI1ZTA5YzllODdjMjRkOTYyNTA3ZGE2NmIzMzAyNWE3NzE5MmUzMDVhMTg5NTEzZjE3MjUzMjMxNjhkYmM4ZjRiZDQ4N2NiNjY1NjJmMzkxNDYxOTczZjliZDc0MWNjODk2MWQ4MmRmNg=="
       }
-      console.log(data)
-      this.appService.signin(data)
+      this.appService.signup(data)
         .subscribe(
           response => {
-            console.log(response)
             if(response.status == 200){
               this.toastr.success("User Created!", "Success")
               setTimeout( ()=> {

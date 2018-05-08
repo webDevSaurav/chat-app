@@ -9,7 +9,7 @@ export class AppService {
 
   private url ="https://chatapi.edwisor.com/api/v1"
 
-  signin(data) : Observable<any>{
+  signup(data) : Observable<any>{
     let params = new HttpParams()
       .set("firstName", data.firstName)
       .set("lastName", data.lastName)
@@ -17,7 +17,19 @@ export class AppService {
       .set("mobileNumber", data.mobNo)
       .set("password", data.password)
       .set("apiKey", data.apikey)
-    console.log(params)
+
     return this.httpClient.post(`${this.url}/users/signup`, params)  
+  }
+
+  signin(data) : Observable<any> {
+    let params = new HttpParams()
+      .set("email", data.email)
+      .set("password", data.password)
+
+    return this.httpClient.post(`${this.url}/users/login`, params)
+  }
+
+  setDataInLocalStorage(data){
+    localStorage.setItem('userInfo', JSON.stringify(data))
   }
 }
