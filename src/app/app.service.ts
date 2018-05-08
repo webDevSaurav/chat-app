@@ -29,7 +29,20 @@ export class AppService {
     return this.httpClient.post(`${this.url}/users/login`, params)
   }
 
+  checkDataInLocalStorage(){
+    if(localStorage.getItem("userInfo") === undefined || localStorage.getItem("userInfo") === "" || localStorage.getItem("userInfo") === null){
+      return false
+    } else {
+      return true
+    }
+  }
+
   setDataInLocalStorage(data){
     localStorage.setItem('userInfo', JSON.stringify(data))
+  }
+
+  getDatafromLocalStorage(){
+    let info = JSON.parse(localStorage.getItem("userInfo"))
+    return info
   }
 }

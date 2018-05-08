@@ -4,7 +4,7 @@
       <div class="row icons">
         <div class="profile-img">
           <div class="circle"></div>
-          <p>Saurav Ganguly</p>
+          <p>{{userName}}</p>
         </div>
       </div>
       <div class="row recent-chats">
@@ -16,30 +16,26 @@
               </li>
             </a>
             <a>
-                <li class="list-group-item list-group-item-action chat-item">
-                  <h5>Online Users : </h5>
-                </li>
-              </a>
-            <a>
               <li class="list-group-item list-group-item-action chat-item">
-                <div class="profile-img">
-                  <div class="circle"></div>
-                </div>
-                <div class="chat-text">
-                  <div class="chat-head">
-                    <div class="user-name">
-                      <span>Vipin</span>
-                    </div>
-                    <div class="chat-time">
-                      <span class="font-weight-light">12:50 AM</span>
-                    </div>
-                  </div>
-                  <div class="last-msg font-weight-light">
-                    <span>How are you?</span>
-                  </div>
-                </div>
+                <h5>Online Users : </h5>
               </li>
             </a>
+            <span *ngFor="let user of usersList">
+              <a *ngIf="user.userId !== userInfo.userId">
+                <li class="list-group-item list-group-item-action chat-item">
+                  <div class="profile-img">
+                    <div class="circle"></div>
+                  </div>
+                  <div class="chat-text">
+                    <div class="chat-head">
+                      <div class="user-name">
+                        <span>{{user.name}}</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </a>
+            </span>
           </ul>
         </div>
       </div>
