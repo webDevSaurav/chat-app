@@ -36,10 +36,10 @@ export class SocketService {
     )
   }
 
-  public userId() : Observable<any>{
+  public chatById(userId) : Observable<any>{
     return Observable.create(
       (observer) => {
-       this.socket.on("userId", data => {
+       this.socket.on(userId, data => {
          observer.next(data)
        })
       }
@@ -85,4 +85,10 @@ export class SocketService {
    }
 
    //end of events to be emitted
+
+   //get prev chat with a user
+   public getChat(senderId, reciverId, skip, authToken) : Observable<any>{
+    let url = `https://chatapi.edwisor.com/api/v1/chat/get/for/user?senderId=${senderId}&receiverId=${reciverId}&skip=${skip}&authToken=${authToken}`
+    return this.http.get(url)
+   }
 }

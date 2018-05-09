@@ -21,7 +21,7 @@
               </li>
             </a>
             <span *ngFor="let user of usersList">
-              <a *ngIf="user.userId !== userInfo.userId">
+              <a *ngIf="user.userId !== userInfo.userId" (click)="onSelectUser(user)">
                 <li class="list-group-item list-group-item-action chat-item">
                   <div class="profile-img">
                     <div class="circle"></div>
@@ -48,50 +48,32 @@
         <div class="profile-img">
           <div class="profile-img">
             <div class="circle"></div>
-            <p>Vipin Verma</p>
+            <p>{{reciverInfo.name}}</p>
           </div>
         </div>
       </div>
       <div class="container">
         <div class="chat-window">
-          <div class="row user-chat">
-            <div class="msg chat-item-left">
-              <span>Hi! </span>
+          <span *ngFor="let message of messageList">
+            <div class="row user-chat" style="margin-bottom : 10px;" *ngIf="message.receiverId == userInfo.userId">
+              <div class="msg chat-item-left">
+                <span>{{message.message}}</span>
+              </div>
             </div>
-          </div>
-          <div class="row my-chat">
-            <div class="msg chat-item-right">
-              <span>Wassup dude!</span>
+            <div class="row my-chat" style="margin-bottom : 10px;" *ngIf="message.receiverId == reciverInfo.userId">
+              <div class="msg chat-item-right">
+                <span>{{message.message}}</span>
+              </div>
             </div>
-          </div>
-          <div class="row user-chat">
-            <div class="msg chat-item-left">
-              <span>Nothing just fun!</span>
-            </div>
-          </div>
-          <div class="row my-chat">
-            <div class="msg chat-item-right">
-              <span>cool!</span>
-            </div>
-          </div>
-          <div class="row user-chat">
-            <div class="msg chat-item-left">
-              <span>Lets catch up!</span>
-            </div>
-          </div>
-          <div class="row my-chat">
-            <div class="msg chat-item-right">
-              <span>yup sure!</span>
-            </div>
-          </div>
+          </span>
         </div>
       </div>
       <div class="row icons enter-chat">
         <div class="input-box">
-          <input type="text" class="form-control" placeholder="Type a message" style="padding : 5px;">
+          <input type="text" class="form-control" placeholder="Type a message" style="padding : 5px;" [(ngModel)]="messageText" (keydown)="sendChatOnKeyPress($event)">
         </div>
         <div>
-          <button class="btn btn-primary" style="padding : 5px;">Send</button>
+          <button class="btn btn-primary" style="padding : 5px;" (click)="sendChat()">Send</button>
         </div>
       </div>
     </div>
