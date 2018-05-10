@@ -13,6 +13,7 @@ import { ChatModule } from './chat/chat.module';
 import { UserManagementModule } from './user-management/user-management.module';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AppService } from './app.service';
+import { RouteGuardService } from './route-guard.service';
 
 
 @NgModule({
@@ -34,7 +35,7 @@ import { AppService } from './app.service';
     ChatModule,
     ToastModule.forRoot()
   ],
-  providers: [AppService],
+  providers: [AppService, RouteGuardService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
