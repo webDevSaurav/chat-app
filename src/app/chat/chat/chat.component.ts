@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, ViewContainerRef, ViewChild, ElementRef } from '@angular/core';
 import { SocketService } from '../../socket.service';
 import { AppService } from '../../app.service';
 import { Cookie } from 'ng2-cookies';
@@ -9,44 +9,50 @@ import { ToastsManager } from 'ng2-toastr';
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css'],
-  providers : [SocketService]
+  providers: [SocketService]
 })
 export class ChatComponent implements OnInit {
+  @ViewChild('scrollMe', { read: ElementRef }) 
+  
+  public scrollMe: ElementRef;
+  scrollToChatTop = false
   initialLoad = true
-  usersList : any[] = []
-  disconnected : boolean
-  userInfo : any
-  reciverInfo : any
-  authToken : string
-  userName :string
-  messageList
-  messageText : String
+  usersList: any[] = []
+  unreadChatUserList : any[] = []
+  disconnected: boolean
+  userInfo: any
+  reciverInfo: any
+  authToken: string
+  userName: string
+  messageList: any = []
+  messageText: String
   pageValue = 0
   constructor(
-    private socketService : SocketService,
-    private appService : AppService,
-    private router : Router,
-    private toastr : ToastsManager,
+    private socketService: SocketService,
+    private appService: AppService,
+    private router: Router,
+    private toastr: ToastsManager,
     vcr: ViewContainerRef
-  ) { 
+  ) {
     this.toastr.setRootViewContainerRef(vcr);
   }
 
   ngOnInit() {
-    if(this.checkStatus()){
+    if (this.checkStatus()) {
       this.verifyUserConformation()
       this.listenToChat()
-    } 
+      this.getUnreadChatUsersList()
+    }
   }
 
-  checkStatus(){
-    if(Cookie.get("authToken") === undefined || Cookie.get("authToken") === "" || Cookie.get("authToken") === null){
+  checkStatus() {
+    if (Cookie.get("authToken") === undefined || Cookie.get("authToken") === "" || Cookie.get("authToken") === null) {
       this.router.navigate(["/"])
       return false
-    } else if(!this.appService.checkDataInLocalStorage){
+    } else if (!this.appService.checkDataInLocalStorage) {
       this.router.navigate(["/"])
       return false
-    } else{
+    } else {
       this.authToken = Cookie.get("authToken")
       this.userInfo = this.appService.getDatafromLocalStorage()
       this.userName = this.userInfo.firstName + " " + this.userInfo.lastName
@@ -54,7 +60,7 @@ export class ChatComponent implements OnInit {
     }
   }
 
-  verifyUserConformation(){
+  verifyUserConformation() {
     this.socketService.verifyUser().subscribe(
       data => {
         this.disconnected = false
@@ -64,12 +70,12 @@ export class ChatComponent implements OnInit {
     )
   }
 
-  getUserList(){
+  getUserList() {
     this.socketService.onlineUserList().subscribe(
       userList => {
         this.usersList = []
-        for(let x in userList){
-          let temp = {"userId" : x, "name" : userList[x], "unread" : 0, chatting : false }
+        for (let x in userList) {
+          let temp = { "userId": x, "name": userList[x], "unread": 0, chatting: false, unReadMsg : false }
           this.usersList.push(temp)
         }
         console.log(this.usersList)
@@ -77,57 +83,131 @@ export class ChatComponent implements OnInit {
     )
   }
 
-  onSelectUser(user){
-    console.log(this.reciverInfo)
+  onSelectUser(user) {
+    this.messageList = []
+    this.usersList.map(
+      (userData) => {
+        if (userData.userId === user.userId) {
+          userData.chatting = true
+        } else {
+          userData.chatting = false
+        }
+      }
+    )
     this.initialLoad = false
     this.reciverInfo = user
-    this.socketService.getChat(this.userInfo.userId, this.reciverInfo.userId, this.pageValue * 10, this.authToken )
+    this.pageValue = 0
+    this.loadPreviousChat()
+    this.getUnreadChatUsersList()
+  }
+
+  loadPreviousChat() {
+    this.socketService.getChat(this.userInfo.userId, this.reciverInfo.userId, this.pageValue * 10, this.authToken)
       .subscribe(
         apiResponse => {
-          if(apiResponse.status == 200){
+          if (apiResponse.status == 200) {
             console.log(apiResponse)
-            this.messageList = apiResponse.data
+            this.messageList = apiResponse.data.concat(this.messageList)
           } else {
             console.log("no chat found")
           }
         }
       )
+    let userDetails = {
+      userId: this.userInfo.userId,
+      senderId: this.reciverInfo.userId
+    }
+    this.socketService.markChatasSeen(userDetails)
+    console.log(this.usersList)
   }
 
-  sendChatOnKeyPress(event){
-    if(event.keyCode == 13){
+  onloadPreviousChat(){
+    this.pageValue++
+    this.loadPreviousChat()
+  }
+
+  sendChatOnKeyPress(event) {
+    if (event.keyCode == 13) {
       this.sendChat()
     }
   }
 
-  sendChat(){
-    if(this.messageText){
+  sendChat() {
+    if (this.messageText) {
       let chatMessage = {
-        senderName : this.userName,
-        senderId : this.userInfo.userId,
-        receiverName : this.reciverInfo.name,
-        receiverId : this.reciverInfo.userId,
-        message : this.messageText,
-        createdOn : new Date()
+        senderName: this.userName,
+        senderId: this.userInfo.userId,
+        receiverName: this.reciverInfo.name,
+        receiverId: this.reciverInfo.userId,
+        message: this.messageText,
+        createdOn: new Date()
       }
-      console.log(chatMessage)  
+      console.log(chatMessage)
       this.socketService.chatMsg(chatMessage)
       this.messageList.push(chatMessage)
     }
     this.messageText = ""
   }
 
-  listenToChat(){
+  listenToChat() {
     this.socketService.chatById(this.userInfo.userId)
       .subscribe(
         data => {
-          this.toastr.success(`${data.senderName} : ${data.message}`, "Message recived")
-          if(data.senderId == this.reciverInfo.userId){
-            this.messageList.push(data)
+          if(this.reciverInfo){
+            if (data.senderId == this.reciverInfo.userId) {
+              this.messageList.push(data)
+            }
           }
+          this.toastr.success(`${data.senderName} : ${data.message}`, "Message recived")
+          this.getUnreadChatUsersList()
         },
         err => {
           console.log(err)
+        }
+      )
+  }
+
+  getUnreadChatUsersList(){
+    this.appService.getUnreadChats(this.userInfo.userId,this.authToken)
+      .subscribe(
+        response => {
+          this.unreadChatUserList = response.data
+        },
+        err => {
+          console.log("some error")
+        },
+        ()=>{
+          this.checkUnreadUserIsOnline()
+        }
+      )
+  }
+  checkUnreadUserIsOnline(){
+    this.usersList.map(
+      (user) => {
+          for(let value of this.unreadChatUserList){
+            if(user.userId === value.userId){
+              user.unReadMsg = true
+            } else {
+              user.unReadMsg = false
+            }
+          }
+      }
+    )
+  }
+  logOut(){
+    this.appService.logOut(this.userInfo.userId, this.authToken)
+      .subscribe(
+        response => {
+          console.log(response)
+          if(response.status == 200){
+            Cookie.delete("authToken")
+            this.appService.clearLocalStorage()
+            this.socketService.exitSocket()
+            this.router.navigate(["/"])
+          }
+        err => {
+          console.log(err)
+        }  
         }
       )
   }

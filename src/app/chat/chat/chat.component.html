@@ -12,7 +12,7 @@
           <ul class="list-group">
             <a>
               <li class="list-group-item list-group-item-action chat-item">
-                <button class="btn btn-primary btn-block">Log Out</button>
+                <button class="btn btn-primary btn-block" (click)="logOut()">Log Out</button>
               </li>
             </a>
             <a>
@@ -22,7 +22,7 @@
             </a>
             <span *ngFor="let user of usersList">
               <a *ngIf="user.userId !== userInfo.userId" (click)="onSelectUser(user)">
-                <li class="list-group-item list-group-item-action chat-item">
+                <li class="list-group-item list-group-item-action chat-item" [ngClass]="{'activeChat' : user.chatting}">
                   <div class="profile-img">
                     <div class="circle"></div>
                   </div>
@@ -30,6 +30,30 @@
                     <div class="chat-head">
                       <div class="user-name">
                         <span>{{user.name}}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="profile-img">
+                    <div class="unread-msg" [ngClass]="{'unread-active' : user.unReadMsg}"></div>
+                  </div>
+                </li>
+              </a>
+            </span>
+            <a>
+              <li class="list-group-item list-group-item-action chat-item">
+                <h5>Unread Messages : </h5>
+              </li>
+            </a>
+            <span *ngFor="let user of unreadChatUserList">
+              <a>
+                <li class="list-group-item list-group-item-action chat-item">
+                  <div class="profile-img">
+                    <div class="circle"></div>
+                  </div>
+                  <div class="chat-text">
+                    <div class="chat-head">
+                      <div class="user-name">
+                        <span>{{user.firstName}} {{user.lastName}}</span>
                       </div>
                     </div>
                   </div>
@@ -53,7 +77,10 @@
         </div>
       </div>
       <div class="container">
-        <div class="chat-window">
+        <div class="chat-window" #scrollMe [scrollTop]="(scrollToChatTop)?0:scrollMe.scrollHeight">
+          <div class="row" class="loadMore">
+            <button class="btn btn-dark" style="padding : 5px; margin : 5px 0; " (click)="onloadPreviousChat()">Load More</button>
+          </div>
           <span *ngFor="let message of messageList">
             <div class="row user-chat" style="margin-bottom : 10px;" *ngIf="message.receiverId == userInfo.userId">
               <div class="msg chat-item-left">

@@ -134,3 +134,21 @@ hr{
     overflow: auto;
     height: 80vh;
 }
+.activeChat{
+    background: #E9EBEB;
+}
+
+.loadMore{
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+}
+.unread-msg{
+    height: 10px;
+    width : 10px;
+    border-radius: 5px;
+    background: #07bc4c;
+}
+.unread-active{
+    background: red;
+}

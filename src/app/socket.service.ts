@@ -91,4 +91,9 @@ export class SocketService {
     let url = `https://chatapi.edwisor.com/api/v1/chat/get/for/user?senderId=${senderId}&receiverId=${reciverId}&skip=${skip}&authToken=${authToken}`
     return this.http.get(url)
    }
+
+   //exit socket
+   public exitSocket(){
+     this.socket.disconnect()
+   }
 }
